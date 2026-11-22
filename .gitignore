@@ -1,0 +1,33 @@
+node_modules/
+.env
+backups/*.zip
+backups/tmp/
+uploads_tmp/*
+!uploads_tmp/.gitkeep
+*.log
+npm-debug.log*
+
+# Python
+python/venv/
+python/__pycache__/
+python/*.pyc
+python/models/*.task
+
+# Downloaded sample/test images (fetched via python/fetch_sample_pose_images.py)
+tests/fixtures/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# test databases/dirs, local notes and assistant files (code, README and .env.example go to GitHub)
+.env.*
+!.env.example
+backups_test/
+uploads_tmp_test/
+backups/.backup.lock
+/tests/
+/_local/
+CLAUDE.md
+AGENTS.md
+.claude/

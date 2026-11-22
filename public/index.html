@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pose Capture</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>Pose Capture</h1>
+    <div class="apikey">
+      <input id="api-key" type="password" autocomplete="off" placeholder="API key (if the server needs one)" aria-label="API key" />
+      <button id="api-key-save" class="btn btn-small" type="button">Save</button>
+    </div>
+    <div class="health">
+      <span id="health-pg" class="dot dot-unknown" title="PostgreSQL"></span>
+      <span id="health-mongo" class="dot dot-unknown" title="MongoDB"></span>
+      <span id="health-text">checking…</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="panel" id="upload-panel">
+      <h2>1. Extract Pose</h2>
+      <div id="dropzone" class="dropzone">
+        <p>Drag &amp; drop an image here, or click to choose a file</p>
+        <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp,image/bmp" hidden />
+      </div>
+      <div id="upload-preview-wrap" class="hidden">
+        <img id="upload-preview" alt="preview" />
+        <div class="upload-actions">
+          <button id="submit-btn" class="btn btn-primary">Extract Pose</button>
+          <button id="cancel-btn" class="btn">Cancel</button>
+        </div>
+      </div>
+      <div id="upload-status" class="status"></div>
+      <div id="upload-spinner" class="spinner-row hidden">
+        <span class="spinner"></span> Running MediaPipe pose extraction…
+      </div>
+
+      <div id="result" class="result hidden">
+        <h3>Result</h3>
+        <div class="result-body">
+          <canvas id="result-canvas"></canvas>
+          <div class="result-meta">
+            <p><strong>Pose detected:</strong> <span id="result-detected"></span></p>
+            <p><strong>People found:</strong> <span id="result-person-count"></span></p>
+            <p><strong>Total landmarks:</strong> <span id="result-count"></span></p>
+            <p><strong>Record ID:</strong> <span id="result-id"></span></p>
+            <details>
+              <summary>Raw JSON</summary>
+              <pre id="result-json"></pre>
+            </details>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>2. Records <button id="refresh-records" class="btn btn-small">Refresh</button></h2>
+      <div class="filters">
+        <input type="text" id="search-input" placeholder="Search by filename…" />
+        <select id="pose-filter" aria-label="Filter by pose detection status">
+          <option value="">All</option>
+          <option value="true">Pose detected</option>
+          <option value="false">No pose</option>
+        </select>
+      </div>
+      <div class="table-scroll">
+      <table class="records-table">
+        <thead>
+          <tr>
+            <th>Image</th>
+            <th>Filename</th>
+            <th>Pose</th>
+            <th>People</th>
+            <th>Landmarks</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="records-body"></tbody>
+      </table>
+      </div>
+      <div id="records-empty" class="empty hidden">No records match.</div>
+      <div class="pagination">
+        <button id="prev-page" class="btn btn-small">&laquo; Prev</button>
+        <span id="page-info"></span>
+        <button id="next-page" class="btn btn-small">Next &raquo;</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>3. Backup</h2>
+      <p class="muted">Runs the same pg_dump + mongodump + zip + email pipeline as the nightly cron job, right now.</p>
+      <button id="backup-btn" class="btn btn-primary">Run Backup Now</button>
+      <div id="backup-status" class="status"></div>
+      <pre id="backup-result" class="hidden"></pre>
+    </section>
+  </main>
+
+  <div id="detail-modal" class="modal hidden">
+    <div class="modal-content">
+      <button id="modal-close" class="modal-close">&times;</button>
+      <h3>Record Detail</h3>
+      <div class="result-body">
+        <canvas id="modal-canvas"></canvas>
+        <div class="result-meta">
+          <p><strong>ID:</strong> <span id="modal-id"></span></p>
+          <p><strong>Pose detected:</strong> <span id="modal-detected"></span></p>
+          <p><strong>People found:</strong> <span id="modal-person-count"></span></p>
+          <p><strong>Total landmarks:</strong> <span id="modal-count"></span></p>
+          <label class="rename-label">
+            Filename:
+            <input type="text" id="modal-filename" />
+            <button id="modal-rename-btn" class="btn btn-small">Save</button>
+          </label>
+          <button id="modal-delete-btn" class="btn btn-danger">Delete Record</button>
+          <details>
+            <summary>Raw JSON</summary>
+            <pre id="modal-json"></pre>
+          </details>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

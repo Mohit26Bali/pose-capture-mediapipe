@@ -1,0 +1,9 @@
+mediapipe==0.10.21
+opencv-python-headless<4.10
+numpy<2
+
+# NOTE: mediapipe==0.10.21 also ships the newer Tasks API (used by
+# pose_extractor.py for multi-person detection) alongside the legacy
+# `solutions` API - no separate package needed. You DO need to separately
+# download the PoseLandmarker .task model file; see README "Python /
+# MediaPipe Setup".

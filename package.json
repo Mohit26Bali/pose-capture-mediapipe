@@ -1,0 +1,29 @@
+{
+  "name": "pose-capture-backend",
+  "version": "1.0.0",
+  "description": "Backend system for keypoint & image capture using MediaPipe, PostgreSQL and MongoDB",
+  "main": "src/server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node --test --test-concurrency=1 tests/*.test.js",
+    "migrate": "node src/db/migrate.js",
+    "backup": "node src/utils/runBackupNow.js",
+    "reprocess": "node src/utils/reprocess.js"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "archiver": "^7.0.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "mongodb": "^6.10.0",
+    "multer": "^2.0.1",
+    "node-cron": "^3.0.3",
+    "nodemailer": "^10.6.1",
+    "pg": "^8.13.1",
+    "sharp": "^0.35.3",
+    "uuid": "^11.1.1"
+  }
+}
