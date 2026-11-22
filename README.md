@@ -968,16 +968,24 @@ This section records what was measured on the real system (25 test photographs, 
 
 ### How accurate is the pose extraction?
 
-Single-person photos (17 images: running, walking, standing, advanced yoga poses): a person was found in every one, and the skeletons looked right on inspection. Photos with no one in them (4): none found.
+Measured on 72 Pexels photographs (the 25 in `tests/fixtures/pexels`, then 47 more fetched through the Pexels API for the cases the first set did not cover). Every photo was viewed and its people counted by eye; 63 of them have a clear count of 0 to 5 people and are scored below. The other 9 are crowds of 8 or more.
 
-Multi-person photos are the weak point. MediaPipe's pose model is built around one person who fills a good part of the frame:
+| | One pass over the image | With tiling (`POSE_TILING=true`, default) |
+|---|---|---|
+| People found, of 86 people in 63 photos | about 60% | about 87% |
+| Photos with no person that still got a false detection (13 photos) | 2 | 6 |
 
-| Setting | People found / people present (8 group photos) |
-|---|---|
-| One pass over the whole image (the original behaviour) | about 16 of 27 (59%): friends photographed small in a wide shot were missed (1 of 4), overlapping family members were merged or lost |
-| With tiling (`POSE_TILING=true`, now the default) | about 24 of 27 (90%) |
+**What works:** one person, any pose (standing, walking, running, sitting, lying down, advanced yoga), including partial body: in upper-body portraits the hidden legs get coordinates but a visibility near 0 (0.0 to 0.5), so filter on per-joint `visibility`. Two to four separated people are found most of the time.
 
-Tiling scans the image again in six overlapping, enlarged crops and keeps a crop detection only when the torso is clearly visible, then removes duplicates. It was tuned on these 25 images, so treat 90% as indicative. It did not fix tightly overlapping people (a family of four standing close together still gives two skeletons), and the `visibility` score is **not** a reliability signal: wrong skeletons scored 0.8 to 0.9. Counting people from this output is only trustworthy for people who are separated and reasonably large in the frame.
+**What does not:**
+- *Small or distant people:* one pass misses them (four friends in a wide shot: 1 found). Tiling fixes most of this, which is where its gain comes from.
+- *False alarms from tiling:* looking at enlarged crops makes the model see people in human-shaped things. Dogs, toy figurines and shop mannequins were reported as people in 6 of 13 person-free photos (statues were not). A single pass had 2. If you care more about "never report a person who is not there" than about finding every small person, set `POSE_TILING=false`. Tuning the crop-acceptance threshold from 0.75 to 0.95 changed almost nothing.
+- *Crowds and dense groups:* 8 or more people are mostly missed (a football huddle: 1 of about 10; a row of yoga students: 2 of 8; a dense street crowd: 0). `POSE_MAX_PEOPLE` also caps the answer (default 5).
+- *Overlap:* people standing very close (a family of four, a couple embracing) often merge into one tangled skeleton.
+- *Darkness, motion blur and silhouettes:* three of four such photos gave nothing.
+- The person-level mean `visibility` is **not** a reliability signal: wrong skeletons scored 0.8 to 0.9.
+
+The tiling rules were tuned on the first 25 photos, then checked on the other 47, where the gain held up (about 54% to 78% on the new set alone). Counts were made by one person looking at the images, so a small error either way is possible. Use these as the shape of the behaviour, not as exact accuracy.
 
 ### Speed
 
