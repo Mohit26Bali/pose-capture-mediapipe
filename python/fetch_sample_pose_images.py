@@ -3,15 +3,13 @@ One-off helper: downloads a small set of sample photos from Pexels to use as
 test fixtures for the pose-capture backend (people in various poses, plus a
 couple of person-less scenes for the "no pose detected" case).
 
-Reuses the Pexels API key already present in D:\\images\\fetch_hotel_images_pexels.py
-(read at runtime via regex) instead of duplicating the key into this repo.
-
+Needs a free Pexels API key in the PEXELS_API_KEY environment variable
+(https://www.pexels.com/api/). The key is never written to this repo.
 Usage:
     python fetch_sample_pose_images.py
 """
 
 import os
-import re
 import time
 import requests
 
@@ -32,13 +30,11 @@ KEYWORDS = [
 ]
 
 
-def load_api_key(script_path: str) -> str:
-    with open(script_path, "r", encoding="utf-8") as f:
-        content = f.read()
-    match = re.search(r'API_KEY\s*=\s*"([^"]+)"', content)
-    if not match:
-        raise RuntimeError(f"Could not find API_KEY in {script_path}")
-    return match.group(1)
+def load_api_key() -> str:
+    key = os.environ.get("PEXELS_API_KEY")
+    if not key:
+        raise SystemExit("Set the PEXELS_API_KEY environment variable first (free key: https://www.pexels.com/api/).")
+    return key
 
 
 def sanitize(name: str) -> str:
@@ -78,7 +74,7 @@ def fetch_keyword(keyword: str, count: int, session: requests.Session, api_key: 
 
 def main():
     os.makedirs(OUTPUT_DIR, exist_ok=True)
-    api_key = load_api_key(HOTEL_SCRIPT_PATH)
+    api_key = load_api_key()
     session = requests.Session()
 
     for keyword, count, expect_pose in KEYWORDS:
